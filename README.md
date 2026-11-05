@@ -101,3 +101,31 @@ Copy `.env.example` to `.env.local`. Keep all secret keys server-side. Never pre
 ## Important production gaps
 
 Authentication, database persistence, background ingestion, live APIs, real LLM calls, email/push delivery, and statistical prediction calibration are not yet implemented. Pages for Creator Radar, Competitor Tracker, Alerts and Growth Planner currently communicate their unconnected state rather than fabricating data.
+
+## Deploy on GitHub Pages (free static hosting)
+
+This repository is configured for GitHub Pages as a static Next.js export.
+
+1. Open **Settings → Pages** in this repository.
+2. Under **Build and deployment**, choose **GitHub Actions** as the source.
+3. Push to `main`. The workflow in `.github/workflows/deploy.yml` builds and publishes the site.
+4. The project site URL is: https://silverwalldiscs.github.io/Algorithm-Tracker/
+
+The build sets the `/Algorithm-Tracker` base path only in GitHub Actions. Local development remains available at http://localhost:3000.
+
+### Static hosting and private services
+
+GitHub Pages serves the frontend only. It does not run Next.js API routes, Server Actions, or a Node.js server. Use Supabase for Auth and Postgres, and Supabase Edge Functions for calls that need private credentials (Gemini and YouTube). Keep secret keys in Supabase Function Secrets, never in this repository or browser code.
+
+The Supabase publishable/anon key may be present in the browser only when Row Level Security is enabled and every table has appropriate policies. Never expose a Supabase secret/service-role key.
+
+### Cost and quota safeguards
+
+- Stay on Supabase Free; monitor project usage and do not upgrade automatically.
+- The free Supabase plan currently includes 500,000 Edge Function invocations. The free plan blocks over-quota usage rather than charging an overage; check current billing settings before enabling any paid plan.
+- YouTube Data API calls use project quota. Cache responses and avoid repeatedly running `search.list`.
+- Gemini's free tier has model-specific rate limits. Add per-user throttling and request limits in the Edge Function. Google states that free-tier content may be used to improve its products; do not send sensitive creator or account information.
+
+### Current limitations
+
+This deployment does not make the provider adapters live by itself. Supabase project credentials, SQL migration, Edge Functions, official API credentials and OAuth configuration must still be set up. TikTok and X remain disabled until an authorized free data source is available.
